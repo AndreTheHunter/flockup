@@ -1,5 +1,5 @@
 name: flockup
-description: DevClub+ implementation of https://github.com/axrs/flockup
+description: DevClub+ workshop implementing https://github.com/axrs/flockup
 
 dependencies:
   flutter:

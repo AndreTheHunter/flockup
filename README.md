@@ -1,6 +1,6 @@
 # flockup
 
-A new Flutter project.
+DevClub+ workshop implementing [https://github.com/axrs/flockup](https://github.com/axrs/flockup)
 
 ## Getting Started
 
