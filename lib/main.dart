@@ -1,5 +1,7 @@
 import 'package:feather/feather.dart';
 import 'package:flockup/actions.dart';
+import 'package:flockup/event_details.dart';
+import 'package:flockup/ui.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(new FlockupApp());
@@ -62,24 +64,15 @@ Widget buildEventListItem(BuildContext context, Map event) {
 
   final String group = getIn(event, ['group', 'name'], '');
   final String name = get(event, 'name', '');
-  final String photo = getIn(event, ['featured_photo', 'photo_link']);
 
-  Widget imageOrPlaceholder() {
-    return new AspectRatio(
-        //TODO get from app OR state. what happens if landscape
-        aspectRatio: 16.0 / 9.0,
-        child: ifVal(
-            photo,
-            (_) => Image.network(
-                  photo,
-                  fit: BoxFit.cover,
-                ),
-            (_) => Container(
-                color: Colors.grey.withOpacity(0.3),
-                child: new Icon(
-                  Icons.image,
-                  size: 44.0,
-                ))));
+  Widget inkwellIfPublic(Widget child) {
+    if (!isPublic) {
+      return child;
+    }
+    return new InkWell(
+      onTap: () => navTo(context, new EventDetails(event)),
+      child: child,
+    );
   }
 
   var header = new Container(
@@ -129,9 +122,9 @@ Widget buildEventListItem(BuildContext context, Map event) {
               ]))));
   return new Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
-      child: Column(children: <Widget>[
+      child: inkwellIfPublic(Column(children: <Widget>[
         header,
-        imageOrPlaceholder(),
+        imageOrPlaceholder(context, event),
         footer,
-      ]));
+      ])));
 }

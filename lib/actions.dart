@@ -2,6 +2,7 @@ import 'dart:convert' show json;
 
 import 'package:feather/feather.dart';
 import 'package:flockup/config.dart';
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 const String EVENTS_URL = "https://api.meetup.com/find/upcoming_events";
@@ -26,4 +27,8 @@ void fetchEvents() {
 
 String mapToQueryParam(Map<String, Object> params) {
   return "?" + params.entries.map((e) => '${e.key}=${e.value}').join("&");
+}
+
+void navTo(context, view) {
+  Navigator.push(context, MaterialPageRoute(builder: (context) => view));
 }
