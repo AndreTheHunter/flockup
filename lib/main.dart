@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:feather/feather.dart';
 import 'package:flockup/actions.dart';
 import 'package:flockup/event_details.dart';
@@ -11,15 +13,15 @@ class FlockupApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //TODO loading throbber
-    //TODO add refreshing
+    var appDb = AppDb.init({}).store;
+    AppDb.dispatch((Map store) => {'title': 'Flockup'});
     fetchEvents();
     return new MaterialApp(
-        title: 'Flockup',
+        title: get(appDb, 'title'),
         theme: new ThemeData(primarySwatch: Colors.red),
         home: new StreamBuilder<Map>(
             stream: stateStream,
-            initialData: AppDb.init({}).store,
+            initialData: appDb,
             builder: (context, snapshot) => buildHome(context, snapshot.data)));
   }
 }
@@ -27,14 +29,11 @@ class FlockupApp extends StatelessWidget {
 Widget buildHome(BuildContext context, Map appDb) {
   final List<Map> events = asMaps(get(appDb, 'events', []));
   return Scaffold(
-      //TODO get title from App Title
-      appBar: AppBar(title: new Text('Flockup')),
+      appBar: AppBar(title: new Text(get(appDb, 'title', ''))),
       body: Center(
           child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-            new Expanded(child: new EventListWidget(events))
-          ])));
+              children: <Widget>[new EventListWidget(events)])));
 }
 
 class EventListWidget extends StatelessWidget {
@@ -45,15 +44,26 @@ class EventListWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new ListView.builder(
-        itemCount: events.length,
-        controller: scrollController,
-        itemBuilder: (BuildContext context, int itemIndex) {
-          if (itemIndex <= events.length) {
-            return buildEventListItem(context, events[itemIndex]);
-          }
-        });
+    return events.length == 0
+        ? new CircularProgressIndicator(value: null)
+        : new Expanded(
+            child: new RefreshIndicator(
+                child: new ListView.builder(
+                    itemCount: events.length,
+                    controller: scrollController,
+                    itemBuilder: (BuildContext context, int itemIndex) {
+                      if (itemIndex <= events.length) {
+                        return buildEventListItem(context, events[itemIndex]);
+                      }
+                    }),
+                //TODO use loading from RefreshIndicator
+                onRefresh: () => new Future<Null>(refresh)));
   }
+}
+
+Null refresh() {
+  fetchEvents();
+  return null;
 }
 
 Widget buildEventListItem(BuildContext context, Map event) {
